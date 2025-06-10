@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; height: 100vh; background-color: #f5f5f5; }
@@ -45,253 +41,6 @@
             color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;
         }
         .reset-all-filters-btn:hover { background-color: #c0392b; }
-        
-        .daily-views-display {
-            margin-left: 10px; padding: 7px 12px; background-color: #f8f9fa; 
-            border: 1px solid #ddd; border-radius: 6px; font-size: 0.8em; color: #495057; 
-            display: flex; align-items: center; gap: 5px; cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .daily-views-display:hover {
-            background-color: #e9ecef;
-        }
-        .firebase-status {
-            margin-left: 5px; padding: 4px 8px; border-radius: 12px; font-size: 0.7em;
-            font-weight: 600; text-transform: uppercase;
-        }
-        .firebase-connected { background: #d4edda; color: #155724; }
-        .firebase-disconnected { background: #f8d7da; color: #721c24; }
-        .firebase-syncing { background: #fff3cd; color: #856404; }
-        .firebase-readonly { background: #e2e3e5; color: #383d41; }
-        .firebase-admin { background: #b3d7ff; color: #004085; }
-        
-        .admin-login-btn {
-            margin-left: 10px; padding: 7px 12px; background-color: #007bff; 
-            color: white; border: none; border-radius: 6px; cursor: pointer;
-            font-size: 0.8em; transition: background-color 0.2s;
-        }
-        .admin-login-btn:hover { background-color: #0056b3; }
-        .admin-logout-btn {
-            margin-left: 10px; padding: 7px 12px; background-color: #6c757d; 
-            color: white; border: none; border-radius: 6px; cursor: pointer;
-            font-size: 0.8em; transition: background-color 0.2s;
-        }
-        .admin-logout-btn:hover { background-color: #545b62; }
-        
-        .views-panel {
-            position: fixed; top: 60px; right: 20px; width: 400px; max-height: 750px;
-            background: white; border: 1px solid #ddd; border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15); z-index: 1007;
-            display: none; overflow: hidden;
-        }
-        .views-panel-header {
-            padding: 12px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;
-            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
-        }
-        .views-panel-content {
-            max-height: 670px; overflow-y: auto; padding: 8px;
-        }
-        .views-summary {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
-        }
-        .views-summary-card {
-            background: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center;
-        }
-        .views-summary-number {
-            font-size: 18px; font-weight: 600; color: #2c3e50;
-        }
-        .views-summary-label {
-            font-size: 11px; color: #6c757d; margin-top: 2px;
-        }
-        
-        /* 관리자 로그인 모달 */
-        .admin-login-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 3000; display: none;
-            align-items: center; justify-content: center;
-        }
-        .admin-login-content {
-            background: white; padding: 30px; border-radius: 12px; max-width: 400px;
-            width: 90%; 
-        }
-        .admin-login-header {
-            font-size: 20px; font-weight: 600; margin-bottom: 20px;
-            color: #2c3e50; display: flex; align-items: center; gap: 10px;
-        }
-        .admin-input-group {
-            margin-bottom: 15px;
-        }
-        .admin-input-group label {
-            display: block; margin-bottom: 5px; font-weight: 500; color: #495057;
-        }
-        .admin-input-group input {
-            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
-            font-size: 14px;
-        }
-        .admin-login-buttons {
-            display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
-        }
-        .admin-login-btn-modal {
-            padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;
-            font-weight: 600; transition: background-color 0.2s;
-        }
-        .admin-login-btn-modal.primary {
-            background: #007bff; color: white;
-        }
-        .admin-login-btn-modal.primary:hover {
-            background: #0056b3;
-        }
-        .admin-login-btn-modal.secondary {
-            background: #6c757d; color: white;
-        }
-        .admin-login-btn-modal.secondary:hover {
-            background: #545b62;
-        }
-        
-        /* Firebase 연결 상태 및 관리 */
-        .firebase-controls {
-            display: flex; flex-direction: column; gap: 8px; margin: 12px 0; 
-            padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;
-        }
-        .firebase-status-section {
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .firebase-control-buttons {
-            display: flex; gap: 6px;
-        }
-        .firebase-btn {
-            padding: 6px 10px; border: none; border-radius: 4px;
-            cursor: pointer; font-size: 11px; font-weight: 600;
-            transition: background-color 0.2s;
-        }
-        .firebase-btn.sync {
-            background: #007bff; color: white;
-        }
-        .firebase-btn.sync:hover {
-            background: #0056b3;
-        }
-        .firebase-btn.backup {
-            background: #28a745; color: white;
-        }
-        .firebase-btn.backup:hover {
-            background: #1e7e34;
-        }
-        .firebase-btn.reset {
-            background: #dc3545; color: white;
-        }
-        .firebase-btn.reset:hover {
-            background: #bd2130;
-        }
-        .firebase-btn:disabled {
-            background: #6c757d; cursor: not-allowed; opacity: 0.6;
-        }
-        
-        .firebase-info {
-            font-size: 10px; color: #6c757d; text-align: center;
-            padding: 8px; background: #e9ecef; border-radius: 4px; margin-top: 8px;
-            line-height: 1.3;
-        }
-        
-        /* 달력 스타일 */
-        .calendar-container {
-            margin: 12px 0;
-        }
-        .calendar-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; padding: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px; color: white;
-        }
-        .calendar-title {
-            font-weight: 700; font-size: 15px; color: white;
-        }
-        .calendar-nav {
-            display: flex; gap: 6px;
-        }
-        .calendar-nav-btn {
-            background: rgba(255,255,255,0.2); color: white; border: none;
-            border-radius: 6px; padding: 6px 10px; cursor: pointer;
-            font-size: 12px; transition: all 0.2s; font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-        .calendar-nav-btn:hover {
-            background: rgba(255,255,255,0.3); transform: scale(1.05);
-        }
-        .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 2px; background: #f8f9fa; border-radius: 8px; padding: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .calendar-day-header {
-            background: #e9ecef; padding: 6px 4px; text-align: center;
-            font-size: 11px; font-weight: 700; color: #495057;
-            border-radius: 4px; margin-bottom: 2px;
-        }
-        .calendar-day-header.sunday { color: #dc3545; }
-        .calendar-day-header.saturday { color: #28a745; }
-        
-        .calendar-day {
-            background: white; border-radius: 6px;
-            min-height: 32px; max-height: 32px; 
-            position: relative; cursor: pointer;
-            transition: all 0.2s; border: 1px solid #e9ecef;
-            display: flex; padding: 3px;
-        }
-        .calendar-day:hover {
-            background: #f8f9fa; transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        .calendar-day.other-month {
-            background: #f8f9fa; opacity: 0.5;
-        }
-        .calendar-day.today {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white; border: 2px solid #007bff;
-            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
-        }
-        .calendar-day.has-views {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-        .calendar-day.today.has-views {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .calendar-day-number {
-            position: absolute; top: 2px; right: 4px;
-            font-size: 11px; font-weight: 700; 
-            color: #495057;
-        }
-        .calendar-day.today .calendar-day-number {
-            color: white;
-        }
-        .calendar-day.sunday .calendar-day-number {
-            color: #dc3545;
-        }
-        .calendar-day.saturday .calendar-day-number {
-            color: #28a745;
-        }
-        
-        .calendar-day-views {
-            position: absolute; bottom: 2px; left: 4px;
-            font-size: 9px; display: flex; align-items: baseline;
-            line-height: 1;
-        }
-        .calendar-day-views .number {
-            font-weight: 700; color: #007bff; margin-right: 1px;
-        }
-        .calendar-day-views .unit {
-            font-weight: 500; color: #6c757d;
-        }
-        .calendar-day.today .calendar-day-views .number {
-            color: white;
-        }
-        .calendar-day.today .calendar-day-views .unit {
-            color: rgba(255,255,255,0.8);
-        }
-        .close-panel {
-            background: none; border: none; font-size: 16px; cursor: pointer;
-            color: #6c757d; padding: 0; width: 20px; height: 20px;
-        }
         
         #filter-result-display {
             position: fixed; top: 65px; left: 50%; transform: translateX(-50%);
@@ -346,9 +95,6 @@
             width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; 
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .status-ongoing { background: #d1f2eb; color: #155724; border: 1px solid #c3e6cb; }
 
         .custom-div-icon { background: transparent !important; border: none !important; }
 
@@ -501,10 +247,6 @@
                 font-size: 0.9em;
                 margin-bottom: 6px;
             }
-            
-            .daily-views-display { font-size: 0.75em; padding: 5px 8px; }
-            .views-panel { width: calc(100% - 40px); max-height: 80vh; }
-            .views-panel-content { max-height: calc(80vh - 60px); }
 
             .leaflet-popup-content-wrapper {
                 min-width: 280px !important;
@@ -565,35 +307,16 @@
 <body>
     <div id="map"></div>
 
-    <div class="admin-login-modal" id="admin-login-modal">
-        <div class="admin-login-content">
-            <div class="admin-login-header">
-                🔐 관리자 로그인
-            </div>
-            <div class="admin-input-group">
-                <label for="admin-email">이메일:</label>
-                <input type="email" id="admin-email" placeholder="admin@company.com">
-            </div>
-            <div class="admin-input-group">
-                <label for="admin-password">비밀번호:</label>
-                <input type="password" id="admin-password" placeholder="관리자 비밀번호">
-            </div>
-            <div style="font-size: 12px; color: #6c757d; padding: 10px; background: #f8f9fa; border-radius: 6px; margin: 10px 0;">
-                <strong>📋 관리자 권한:</strong><br>
-                • 조회수 데이터 수정/삭제<br>
-                • 실시간 동기화 제어<br>
-                • 전체 사용자 통계 관리
-            </div>
-            <div class="admin-login-buttons">
-                <button class="admin-login-btn-modal secondary" onclick="closeAdminLogin()">취소</button>
-                <button class="admin-login-btn-modal primary" onclick="performAdminLogin()">로그인</button>
-            </div>
-        </div>
-    </div>
-
     <div id="top-filter-bar">
         <div style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-right: 15px; display: flex; align-items: center;">
             🔍 ODA 프로젝트 필터링
+        </div>
+        <div class="filter-button-group">
+            <button class="filter-bar-button" data-dropdown="continentDropdown">대륙 ▾</button>
+            <div class="filter-dropdown" id="continentDropdown">
+                <div class="filter-title">대륙 선택</div>
+                <div class="checkbox-group" id="continentFilters"></div>
+            </div>
         </div>
         <div class="filter-button-group">
             <button class="filter-bar-button" data-dropdown="countryDropdown">국가 ▾</button>
@@ -603,69 +326,6 @@
             </div>
         </div>
         <button class="reset-all-filters-btn" onclick="resetAllFilters()">🔄 전체 초기화</button>
-        <div class="daily-views-display" onclick="toggleViewsPanel()">
-            <span>👁️</span>
-            <span>오늘: <span id="daily-views">0</span> | 누적: <span id="total-views">0</span></span>
-            <span class="firebase-status" id="firebase-status">OFFLINE</span>
-            <span style="font-size: 10px;">▼</span>
-        </div>
-        <button class="admin-login-btn" id="admin-login-btn" onclick="showAdminLogin()">🔐 관리자</button>
-        <button class="admin-logout-btn" id="admin-logout-btn" onclick="performAdminLogout()" style="display: none;">🚪 로그아웃</button>
-    </div>
-
-    <div class="views-panel" id="views-panel">
-        <div class="views-panel-header">
-            <span>📊 조회수 통계</span>
-            <button class="close-panel" onclick="toggleViewsPanel()">✕</button>
-        </div>
-        <div class="views-panel-content">
-            <div class="views-summary">
-                <div class="views-summary-card">
-                    <div class="views-summary-number" id="summary-today">0</div>
-                    <div class="views-summary-label">오늘</div>
-                </div>
-                <div class="views-summary-card">
-                    <div class="views-summary-number" id="summary-total">0</div>
-                    <div class="views-summary-label">누적</div>
-                </div>
-            </div>
-            
-            <div class="firebase-controls" id="firebase-admin-controls" style="display: none;">
-                <div class="firebase-status-section">
-                    <div>
-                        <div style="font-size: 12px; font-weight: 600;">🔥 Firebase 연결</div>
-                        <div style="font-size: 10px; color: #6c757d;" id="firebase-connection-info">연결 대기 중...</div>
-                    </div>
-                    <div style="font-size: 10px; color: #6c757d;" id="user-role-info">관리자</div>
-                </div>
-                <div class="firebase-control-buttons" id="firebase-controls">
-                    <button class="firebase-btn sync" onclick="manualSync()" id="sync-btn">🔄 동기화</button>
-                    <button class="firebase-btn backup" onclick="exportFirebaseData()">💾 내보내기</button>
-                    <button class="firebase-btn reset" onclick="resetFirebaseData()" id="reset-btn">🗑️ 초기화</button>
-                </div>
-                <div class="firebase-info">
-                    <div id="last-sync-info">마지막 동기화: 없음</div>
-                    <div id="total-users-info">전체 사용자 수: 확인 중...</div>
-                    <div id="admin-status-info">현재 상태: 관리자 모드</div>
-                </div>
-            </div>
-            
-            <div class="calendar-container">
-                <div style="border-bottom: 1px solid #dee2e6; margin-bottom: 12px; padding-bottom: 8px;">
-                    <strong style="font-size: 13px; color: #495057;">📅 월별 조회수</strong>
-                </div>
-                <div class="calendar-header">
-                    <div class="calendar-title" id="calendar-title">2024년 6월</div>
-                    <div class="calendar-nav">
-                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
-                        <button class="calendar-nav-btn" onclick="goToToday()">오늘</button>
-                        <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
-                    </div>
-                </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    </div>
-            </div>
-        </div>
     </div>
 
     <div id="filter-result-display">
@@ -683,9 +343,9 @@
                 <div class="stat-number" id="countries-count">-</div>
                 <div class="stat-label">참여 국가</div>
             </div>
-            <div class="stat-card" id="stat-project-types">
-                <div class="stat-number" id="project-types">-</div>
-                <div class="stat-label">사업 형태</div>
+            <div class="stat-card" id="stat-continents-count">
+                <div class="stat-number" id="continents-count">-</div>
+                <div class="stat-label">대륙별 분포</div>
             </div>
             <div class="stat-card" id="stat-total-budget">
                 <div class="stat-number" id="total-budget">-</div>
@@ -713,37 +373,10 @@
         let allProjects = [];
         let filteredProjects = [];
         let activeFilters = {
+            continents: new Set(),
             countries: new Set()
         };
         
-        // Firebase 관련 변수
-        let firebaseApp = null;
-        let firebaseDatabase = null;
-        let firebaseAuth = null;
-        let firebaseConnected = false;
-        let isAdmin = false;
-        let currentUser = null;
-        let userId = 'readonly_user';
-        let dailyViews = 0;
-        let viewsHistory = {};
-        let totalViews = 0;
-        let currentCalendarDate = new Date();
-
-        let hasViewedSession = sessionStorage.getItem('hasViewedPage') === 'true'; 
-        let viewsRef = null;
-
-        // Firebase 설정
-        const firebaseConfig = {
-            "apiKey": "AIzaSyDelJ0v-idzA7-Cu-fX8KP8-Jr2Hau2h7M",
-            "authDomain": "global-mapview.firebaseapp.com",
-            "databaseURL": "https://global-mapview-default-rtdb.asia-southeast1.firebasedatabase.app",
-            "projectId": "global-mapview",
-            "storageBucket": "global-mapview.firebasestorage.app",
-            "messagingSenderId": "122573358864",
-            "appId": "1:122573358864:web:cad3496eae834a56ea8795",
-            "measurementId": "G-KF9SNVDDY1"
-        };
-
         const projectColor = '#FF8C00'; // ODA 색상
         
         const countryCodeMap = {
@@ -758,594 +391,6 @@
             "러시아": "ru", "미국": "us", "요르단": "jo", "알제리": "dz", "파라과이": "py", 
             "말레이시아": "my", "브루나이": "bn", "과테말라": "gt", "파키스탄": "pk"
         };
-
-        // ===========================================
-        // Firebase 인증 및 권한 관리
-        // ===========================================
-        
-        function initializeFirebase() {
-            try {
-                firebaseApp = firebase.initializeApp(firebaseConfig);
-                firebaseDatabase = firebase.database();
-                firebaseAuth = firebase.auth();
-                viewsRef = firebaseDatabase.ref('views');
-                
-                updateFirebaseStatus('connecting', '연결 중...');
-                
-                const connectedRef = firebaseDatabase.ref('.info/connected');
-                connectedRef.on('value', (snapshot) => {
-                    firebaseConnected = snapshot.val() === true;
-                    if (firebaseConnected) {
-                        updateFirebaseStatus('connected', '연결됨');
-                        syncViewsWithFirebase();
-                    } else {
-                        updateFirebaseStatus('disconnected', '연결 끊김');
-                    }
-                });
-                
-                firebaseAuth.onAuthStateChanged((user) => {
-                    currentUser = user;
-                    if (user) {
-                        userId = user.uid;
-                        isAdmin = true;
-                        updateAdminUI(true);
-                        showNotification(`관리자로 로그인되었습니다: ${user.email}`, 'success');
-                    } else {
-                        userId = 'readonly_user';
-                        isAdmin = false;
-                        updateAdminUI(false);
-                    }
-                });
-                
-                showNotification('Firebase에 연결 중입니다...', 'info');
-                
-            } catch (error) {
-                console.error('Firebase 초기화 실패:', error);
-                updateFirebaseStatus('disconnected', '연결 실패');
-                showNotification('Firebase 연결에 실패했습니다.', 'error');
-            }
-        }
-
-        function showAdminLogin() {
-            document.getElementById('admin-login-modal').style.display = 'flex';
-        }
-
-        function closeAdminLogin() {
-            document.getElementById('admin-login-modal').style.display = 'none';
-            document.getElementById('admin-email').value = '';
-            document.getElementById('admin-password').value = '';
-        }
-
-        async function performAdminLogin() {
-            const email = document.getElementById('admin-email').value.trim();
-            const password = document.getElementById('admin-password').value.trim();
-            
-            if (!email || !password) {
-                showNotification('이메일과 비밀번호를 모두 입력해주세요.', 'warning');
-                return;
-            }
-            
-            try {
-                await firebaseAuth.signInWithEmailAndPassword(email, password);
-                closeAdminLogin();
-            } catch (error) {
-                console.error('로그인 실패:', error);
-                let errorMessage = '로그인에 실패했습니다.';
-                
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = '등록되지 않은 이메일입니다.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = '비밀번호가 올바르지 않습니다.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = '이메일 형식이 올바르지 않습니다.';
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMessage = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
-                        break;
-                    default:
-                        errorMessage += ` (${error.code})`;
-                }
-                
-                showNotification(errorMessage, 'error');
-            }
-        }
-
-        async function performAdminLogout() {
-            try {
-                await firebaseAuth.signOut();
-                showNotification('로그아웃되었습니다.', 'success');
-                sessionStorage.removeItem('hasViewedPage'); 
-                hasViewedSession = false;
-            } catch (error) {
-                console.error('로그아웃 실패:', error);
-                showNotification('로그아웃에 실패했습니다.', 'error');
-            }
-        }
-
-        function updateAdminUI(adminStatus) {
-            const loginBtn = document.getElementById('admin-login-btn');
-            const logoutBtn = document.getElementById('admin-logout-btn');
-            const syncBtn = document.getElementById('sync-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const statusBadge = document.getElementById('firebase-status');
-            const adminControls = document.getElementById('firebase-admin-controls');
-            
-            if (adminStatus) {
-                loginBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-block';
-                statusBadge.className = 'firebase-status firebase-admin';
-                statusBadge.textContent = 'ADMIN';
-                adminControls.style.display = 'block';
-                
-                if (syncBtn) syncBtn.disabled = false;
-                if (resetBtn) resetBtn.disabled = false;
-            } else {
-                loginBtn.style.display = 'inline-block';
-                logoutBtn.style.display = 'none';
-                statusBadge.className = 'firebase-status firebase-readonly';
-                statusBadge.textContent = 'READONLY';
-                adminControls.style.display = 'none';
-                
-                if (syncBtn) syncBtn.disabled = true;
-                if (resetBtn) resetBtn.disabled = true;
-            }
-        }
-
-        function updateFirebaseStatus(status, message) {
-            const infoElement = document.getElementById('firebase-connection-info');
-            const statusBadge = document.getElementById('firebase-status');
-            
-            if (infoElement) {
-                infoElement.textContent = message;
-            }
-            
-            if (!isAdmin) {
-                 if (status === 'connected') {
-                    statusBadge.className = 'firebase-status firebase-connected';
-                    statusBadge.textContent = 'LIVE';
-                } else if (status === 'disconnected') {
-                    statusBadge.className = 'firebase-status firebase-disconnected';
-                    statusBadge.textContent = 'OFFLINE';
-                } else if (status === 'syncing') {
-                    statusBadge.className = 'firebase-status firebase-syncing';
-                    statusBadge.textContent = 'SYNCING';
-                }
-            }
-        }
-
-        // ===========================================
-        // 조회수 관리 시스템
-        // ===========================================
-        
-        function initializeViewsSystem() {
-            loadLocalViews();
-            
-            if (!hasViewedSession) {
-                incrementDailyViews();
-                hasViewedSession = true;
-                sessionStorage.setItem('hasViewedPage', 'true');
-                showNotification('페이지 조회수가 1 증가했습니다! 👁️', 'success');
-            }
-            
-            initializeFirebase();
-        }
-
-        function loadLocalViews() {
-            const savedViews = localStorage.getItem('globalMapViews');
-            if (savedViews) {
-                try {
-                    viewsHistory = JSON.parse(savedViews);
-                } catch (error) {
-                    console.error('로컬 조회수 데이터 파싱 실패:', error);
-                    viewsHistory = {};
-                }
-            } else {
-                viewsHistory = {};
-            }
-            
-            calculateViewsStats();
-            updateViewsDisplay();
-            updateCalendar();
-        }
-
-        function saveLocalViews() {
-            try {
-                localStorage.setItem('globalMapViews', JSON.stringify(viewsHistory));
-            } catch (error) {
-                console.error('로컬 조회수 데이터 저장 실패:', error);
-            }
-        }
-
-        function incrementDailyViews() {
-            const today = getTodayString();
-            viewsHistory[today] = (viewsHistory[today] || 0) + 1;
-            
-            calculateViewsStats();
-            updateViewsDisplay();
-            updateCalendar();
-            saveLocalViews();
-            
-            console.log(`조회수 증가: ${today} = ${viewsHistory[today]}`);
-        }
-
-        function syncViewsWithFirebase() {
-            if (!firebaseConnected || !viewsRef) {
-                console.log('Firebase 연결 안됨 - 동기화 건너뛰기');
-                return;
-            }
-            
-            viewsRef.once('value')
-                .then((snapshot) => {
-                    const firebaseData = snapshot.val();
-                    
-                    if (firebaseData) {
-                        const aggregatedViews = {};
-                        Object.values(firebaseData).forEach(userData => {
-                            if (userData.history) {
-                                Object.keys(userData.history).forEach(date => {
-                                    aggregatedViews[date] = (aggregatedViews[date] || 0) + userData.history[date];
-                                });
-                            }
-                        });
-                        
-                        Object.keys(aggregatedViews).forEach(date => {
-                            viewsHistory[date] = Math.max(viewsHistory[date] || 0, aggregatedViews[date]);
-                        });
-                        
-                        if (hasNewLocalData(aggregatedViews)) {
-                            uploadLocalViewsToFirebase();
-                        }
-                    } else {
-                        uploadLocalViewsToFirebase();
-                    }
-                    
-                    calculateViewsStats();
-                    updateViewsDisplay();
-                    updateCalendar();
-                    saveLocalViews();
-                    
-                    console.log('Firebase와 조회수 동기화 완료');
-                })
-                .catch((error) => {
-                    console.error('Firebase 조회수 동기화 실패:', error);
-                });
-        }
-
-        function hasNewLocalData(firebaseViews) {
-            return Object.keys(viewsHistory).some(date => 
-                (viewsHistory[date] || 0) > (firebaseViews[date] || 0)
-            );
-        }
-
-        function uploadLocalViewsToFirebase() {
-            if (!firebaseConnected || !viewsRef) {
-                console.log('Firebase 연결 안됨 - 업로드 건너뛰기');
-                return;
-            }
-            
-            const userPath = isAdmin ? `views/${userId}` : `views/readonly_user`;
-            const userRef = firebaseDatabase.ref(userPath);
-            
-            const dataToSave = {
-                history: viewsHistory,
-                lastUpdate: firebase.database.ServerValue.TIMESTAMP,
-                totalViews: Object.values(viewsHistory).reduce((sum, count) => sum + count, 0),
-                userId: userId,
-                userType: isAdmin ? 'admin' : 'readonly'
-            };
-            
-            userRef.update(dataToSave)
-                .then(() => {
-                    console.log('로컬 조회수 데이터를 Firebase에 업로드 완료');
-                    updateLastSyncInfo();
-                })
-                .catch((error) => {
-                    console.error('Firebase 업로드 실패:', error);
-                });
-        }
-
-        function manualSync() {
-            if (!isAdmin) {
-                showNotification('관리자만 수동 동기화를 실행할 수 있습니다.', 'warning');
-                return;
-            }
-            
-            if (!firebaseConnected) {
-                showNotification('Firebase에 연결되지 않았습니다.', 'warning');
-                return;
-            }
-            
-            updateFirebaseStatus('syncing', '동기화 중...');
-            syncViewsWithFirebase();
-            showNotification('수동 동기화가 완료되었습니다.', 'success');
-            updateFirebaseStatus('connected', '동기화 완료');
-        }
-
-        function calculateViewsStats() {
-            totalViews = Object.values(viewsHistory).reduce((sum, count) => sum + count, 0);
-            const today = getTodayString();
-            dailyViews = viewsHistory[today] || 0;
-        }
-
-        function updateLastSyncInfo() {
-            const syncElement = document.getElementById('last-sync-info');
-            if (syncElement) {
-                const now = new Date();
-                syncElement.textContent = `마지막 동기화: ${now.toLocaleTimeString()}`;
-            }
-        }
-
-        function updateTotalUsersCount() {
-            if (!firebaseDatabase) return;
-            
-            const viewsRootRef = firebaseDatabase.ref('views');
-            viewsRootRef.once('value')
-                .then((snapshot) => {
-                    const allUsersData = snapshot.val();
-                    const userCount = allUsersData ? Object.keys(allUsersData).length : 0;
-                    
-                    const usersElement = document.getElementById('total-users-info');
-                    if (usersElement) {
-                        usersElement.textContent = `전체 사용자 수: ${userCount}명`;
-                    }
-                })
-                .catch((error) => {
-                    console.error('사용자 수 조회 실패:', error);
-                });
-        }
-
-        function exportFirebaseData() {
-            if (!isAdmin) {
-                showNotification('관리자만 내보내기를 할 수 있습니다.', 'warning');
-                return;
-            }
-            
-            const exportData = {
-                exportedBy: currentUser ? currentUser.email : 'unknown_admin',
-                viewsHistory: viewsHistory,
-                totalViews: totalViews,
-                exportDate: new Date().toISOString(),
-                source: 'LocalStorage_Firebase_Export'
-            };
-            
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `조회수_백업_${new Date().toISOString().split('T')[0]}.json`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification('조회수 데이터가 내보내기되었습니다!', 'success');
-        }
-
-        function resetFirebaseData() {
-            if (!isAdmin) {
-                showNotification('관리자만 데이터를 초기화할 수 있습니다.', 'warning');
-                return;
-            }
-            
-            const confirmed = confirm(
-                '⚠️ 경고: 모든 조회수 데이터가 삭제됩니다.\n\n' +
-                '이 작업은 되돌릴 수 없습니다.\n' +
-                '정말로 초기화하시겠습니까?'
-            );
-            
-            if (confirmed) {
-                viewsHistory = {};
-                totalViews = 0;
-                dailyViews = 0;
-                localStorage.removeItem('globalMapViews');
-                sessionStorage.removeItem('hasViewedPage');
-                hasViewedSession = false;
-                
-                if (firebaseConnected && viewsRef) {
-                    viewsRef.remove()
-                        .then(() => {
-                            showNotification('모든 조회수 데이터가 초기화되었습니다.', 'success');
-                        })
-                        .catch((error) => {
-                            console.error('Firebase 데이터 초기화 실패:', error);
-                            showNotification('Firebase 데이터 초기화에 실패했습니다.', 'error');
-                        });
-                } else {
-                    showNotification('로컬 조회수 데이터가 초기화되었습니다.', 'success');
-                }
-                
-                updateViewsDisplay();
-                updateCalendar();
-            }
-        }
-
-        function getTodayString() {
-            const today = new Date();
-            return today.getFullYear() + '-' + 
-                   String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                   String(today.getDate()).padStart(2, '0');
-        }
-
-        function updateViewsDisplay() {
-            const dailyElement = document.getElementById('daily-views');
-            const totalElement = document.getElementById('total-views');
-            
-            if (dailyElement) dailyElement.textContent = dailyViews.toLocaleString();
-            if (totalElement) totalElement.textContent = totalViews.toLocaleString();
-            
-            const summaryToday = document.getElementById('summary-today');
-            const summaryTotal = document.getElementById('summary-total');
-            
-            if (summaryToday) summaryToday.textContent = dailyViews.toLocaleString();
-            if (summaryTotal) summaryTotal.textContent = totalViews.toLocaleString();
-        }
-
-        function toggleViewsPanel() {
-            const panel = document.getElementById('views-panel');
-            const isVisible = panel.style.display === 'block';
-            
-            if (isVisible) {
-                panel.style.display = 'none';
-            } else {
-                updateCalendar();
-                updateTotalUsersCount();
-                panel.style.display = 'block';
-            }
-        }
-
-        // ===========================================
-        // 달력 시스템
-        // ===========================================
-
-        function updateCalendar() {
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            
-            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', 
-                                '7월', '8월', '9월', '10월', '11월', '12월'];
-            document.getElementById('calendar-title').textContent = `${year}년 ${monthNames[month]}`;
-            
-            generateCalendarGrid(year, month);
-        }
-
-        function generateCalendarGrid(year, month) {
-            const calendarGrid = document.getElementById('calendar-grid');
-            calendarGrid.innerHTML = '';
-            
-            const dayHeaders = [
-                { name: '일', class: 'sunday' },
-                { name: '월', class: '' },
-                { name: '화', class: '' },
-                { name: '수', class: '' },
-                { name: '목', class: '' },
-                { name: '금', class: '' },
-                { name: '토', class: 'saturday' }
-            ];
-            
-            dayHeaders.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = `calendar-day-header ${day.class}`;
-                dayHeader.textContent = day.name;
-                calendarGrid.appendChild(dayHeader);
-            });
-            
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const daysInMonth = lastDay.getDate();
-            
-            const startDayOfWeek = firstDay.getDay();
-            
-            const prevMonth = new Date(year, month - 1, 0);
-            const prevMonthDays = prevMonth.getDate();
-            
-            for (let i = startDayOfWeek - 1; i >= 0; i--) {
-                const dayNum = prevMonthDays - i;
-                const dayOfWeek = (startDayOfWeek - 1 - i + 7) % 7;
-                const dayElement = createCalendarDay(dayNum, year, month - 1, true, dayOfWeek);
-                calendarGrid.appendChild(dayElement);
-            }
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayOfWeek = (startDayOfWeek + day - 1) % 7;
-                const dayElement = createCalendarDay(day, year, month, false, dayOfWeek);
-                calendarGrid.appendChild(dayElement);
-            }
-            
-            const totalCells = calendarGrid.children.length - 7;
-            const remainingCells = 42 - totalCells;
-            
-            for (let day = 1; day <= remainingCells; day++) {
-                const dayOfWeek = (startDayOfWeek + daysInMonth + day - 1) % 7;
-                const dayElement = createCalendarDay(day, year, month + 1, true, dayOfWeek);
-                calendarGrid.appendChild(dayElement);
-            }
-        }
-
-        function createCalendarDay(day, year, month, isOtherMonth, dayOfWeek) {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'calendar-day';
-            
-            if (isOtherMonth) {
-                dayElement.classList.add('other-month');
-            }
-            
-            if (dayOfWeek === 0) {
-                dayElement.classList.add('sunday');
-            } else if (dayOfWeek === 6) {
-                dayElement.classList.add('saturday');
-            }
-            
-            const dateObj = new Date(year, month, day);
-            const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-            const today = getTodayString();
-            
-            if (dateStr === today && !isOtherMonth) {
-                dayElement.classList.add('today');
-            }
-            
-            const viewCount = viewsHistory[dateStr] || 0;
-            
-            if (viewCount > 0) {
-                dayElement.classList.add('has-views');
-            }
-            
-            const dayNumber = document.createElement('div');
-            dayNumber.className = 'calendar-day-number';
-            dayNumber.textContent = day;
-            dayElement.appendChild(dayNumber);
-            
-            if (viewCount > 0) {
-                const viewsElement = document.createElement('div');
-                viewsElement.className = 'calendar-day-views';
-                viewsElement.innerHTML = `<span class="number">${viewCount}</span><span class="unit">회</span>`;
-                dayElement.appendChild(viewsElement);
-            }
-            
-            dayElement.addEventListener('click', () => {
-                const formattedDate = formatDateForDisplay(dateStr);
-                const message = viewCount > 0 
-                    ? `${formattedDate}: ${viewCount}회 조회`
-                    : `${formattedDate}: 조회 기록 없음`;
-                showNotification(message, 'info');
-            });
-            
-            return dayElement;
-        }
-
-        function changeMonth(direction) {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
-            updateCalendar();
-        }
-
-        function goToToday() {
-            currentCalendarDate = new Date();
-            updateCalendar();
-        }
-
-        function formatDateForDisplay(dateString) {
-            const date = new Date(dateString);
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (dateString === getTodayString()) {
-                return '오늘';
-            } else if (dateString === yesterday.getFullYear() + '-' + 
-                                   String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
-                                   String(yesterday.getDate()).padStart(2, '0')) {
-                return '어제';
-            } else {
-                const month = date.getMonth() + 1;
-                const day = date.getDate();
-                const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-                const weekday = weekdays[date.getDay()];
-                return `${month}월 ${day}일 (${weekday})`;
-            }
-        }
 
         // ===========================================
         // 기타 공통 함수들
@@ -1547,7 +592,7 @@
                             category: 'ODA',
                             period: period ? period.toString().trim() : '',
                             budget: budget || 0,
-                            continent: continent ? continent.toString().trim() : '',
+                            continent: continent ? continent.toString().trim() : '기타',
                             type: type ? type.toString().trim() : '',
                             content: projectContent ? projectContent.toString().trim() : '',
                             number: projects.length + 1,
@@ -1584,7 +629,7 @@
                 showNotification('ODA Excel 파일을 읽을 수 없습니다. 파일을 확인해주세요.', 'error');
                 
                 allProjects = [
-                    {name: "베트남", lat: 13.93788, lng: 107.84167, description: "샘플 ODA 프로젝트", category: "ODA", period: "'20-'25", budget: 5365, type: "양자무상", number: 1}
+                    {name: "베트남", lat: 13.93788, lng: 107.84167, description: "샘플 ODA 프로젝트", category: "ODA", period: "'20-'25", budget: 5365, type: "양자무상", continent: "아시아", number: 1}
                 ];
             }
         }
@@ -1600,9 +645,20 @@
 
         function initializeFilters() {
             console.log('필터 초기화');
+            initContinentFilters();
             initCountryFilters();
             applyFilters();
             setupFilterDropdowns();
+        }
+
+        function initContinentFilters() {
+            const container = document.getElementById('continentFilters');
+            container.innerHTML = '';
+            const continents = [...new Set(allProjects.map(p => p.continent || '기타'))].sort();
+            continents.forEach(continent => {
+                const count = allProjects.filter(p => (p.continent || '기타') === continent).length;
+                container.appendChild(createCheckboxItem(continent, count, 'continent'));
+            });
         }
 
         function initCountryFilters() {
@@ -1631,21 +687,24 @@
         }
 
         function updateFilter(type, value, checked) {
-            if (type === 'country') {
-                const filterSet = activeFilters.countries;
-                
-                if (checked) {
-                    filterSet.add(value);
-                } else {
-                    filterSet.delete(value);
-                }
-                
-                applyFilters();
+            const filterMap = { continent: 'continents', country: 'countries' };
+            const filterSet = activeFilters[filterMap[type]];
+            
+            if (checked) {
+                filterSet.add(value);
+            } else {
+                filterSet.delete(value);
             }
+            
+            applyFilters();
         }
 
         function applyFilters() {
             filteredProjects = allProjects.filter(project => {
+                if (activeFilters.continents.size > 0 && !activeFilters.continents.has(project.continent || '기타')) {
+                    return false;
+                }
+                
                 if (activeFilters.countries.size > 0 && !activeFilters.countries.has(project.name.trim())) {
                     return false;
                 }
@@ -1753,12 +812,12 @@
                 
                 content += `<div class="popup-project-details">`;
                 
-                if (project.type) content += `<div><strong>형태:</strong> ${project.type}</div>`;
                 if (project.period) content += `<div><strong>기간:</strong> ${project.period}</div>`;
                 if (project.budget > 0) {
                     const budgetInBillion = Math.round(project.budget / 100).toLocaleString('ko-KR');
                     content += `<div class="popup-budget"><strong>예산:</strong> ${budgetInBillion}억원</div>`;
                 }
+                if (project.continent) content += `<div><strong>대륙:</strong> ${project.continent}</div>`;
                 
                 content += `</div></div>`;
             });
@@ -1768,12 +827,13 @@
         }
 
         function updateStats() {
-            const totalCount = allProjects.length;
-            const countryCount = new Set(allProjects.map(p => p.name.trim())).size;
-            const typeCount = new Set(allProjects.map(p => p.type).filter(t => t)).size;
+            // 필터링된 프로젝트를 기준으로 집계
+            const totalCount = filteredProjects.length;
+            const countryCount = new Set(filteredProjects.map(p => p.name.trim())).size;
+            const continentCount = new Set(filteredProjects.map(p => p.continent || '기타')).size;
             
             let totalBudget = 0;
-            allProjects.forEach(p => {
+            filteredProjects.forEach(p => {
                 if (p.budget && !isNaN(p.budget)) {
                     totalBudget += p.budget;
                 }
@@ -1783,18 +843,18 @@
             
             document.getElementById('total-projects').textContent = totalCount.toLocaleString();
             document.getElementById('countries-count').textContent = countryCount.toLocaleString();
-            document.getElementById('project-types').textContent = typeCount.toLocaleString();
+            document.getElementById('continents-count').textContent = continentCount.toLocaleString();
             document.getElementById('total-budget').textContent = budgetInBillion;
             
             document.getElementById('stat-total-projects').style.borderColor = '#2c3e50';
             document.getElementById('stat-countries-count').style.borderColor = '#e74c3c';
-            document.getElementById('stat-project-types').style.borderColor = '#FF8C00';
+            document.getElementById('stat-continents-count').style.borderColor = '#FF8C00';
             document.getElementById('stat-total-budget').style.borderColor = '#27ae60';
         }
 
         function updateFilterResultText() {
             const resultTextEl = document.getElementById('filterResultText');
-            const noFilters = activeFilters.countries.size === 0;
+            const noFilters = activeFilters.continents.size === 0 && activeFilters.countries.size === 0;
             
             if (noFilters) {
                 resultTextEl.textContent = `전체 ${allProjects.length}개 ODA 프로젝트 표시 중`;
@@ -1832,7 +892,7 @@
 
         function resetAllFilters() {
             document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
-            activeFilters = { countries: new Set() };
+            activeFilters = { continents: new Set(), countries: new Set() };
             applyFilters();
             document.querySelectorAll('.filter-dropdown').forEach(dd => dd.style.display = 'none');
             document.querySelectorAll('.filter-bar-button').forEach(btn => btn.classList.remove('active'));
@@ -1866,8 +926,6 @@
             try {
                 console.log('ODA 지도 애플리케이션 초기화 시작');
                 
-                initializeViewsSystem();
-                
                 initMap();
                 await loadData();
                 initializeFilters();
@@ -1894,14 +952,6 @@
         
         window.resetAllFilters = resetAllFilters;
         window.goToMyLocation = goToMyLocation;
-        window.toggleViewsPanel = toggleViewsPanel;
-        window.showAdminLogin = showAdminLogin;
-        window.closeAdminLogin = closeAdminLogin;
-        window.performAdminLogin = performAdminLogin;
-        window.performAdminLogout = performAdminLogout;
-        window.manualSync = manualSync;
-        window.exportFirebaseData = exportFirebaseData;
-        window.resetFirebaseData = resetFirebaseData;
-        window.changeMonth = changeMonth;
-        window.goToToday = goToToday;
     </script>
+</body>
+</html>
